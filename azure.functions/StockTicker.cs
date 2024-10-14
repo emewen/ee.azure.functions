@@ -6,16 +6,16 @@ using Microsoft.Extensions.Logging;
 
 namespace azure.functions
 {
-    public class Function1
+    public class StockTicker
     {
-        private readonly ILogger<Function1> _logger;
+        private readonly ILogger<StockTicker> _logger;
 
-        public Function1(ILogger<Function1> logger)
+        public StockTicker(ILogger<StockTicker> logger)
         {
             _logger = logger;
         }
 
-        [Function(nameof(Function1))]
+        [Function(nameof(StockTicker))]
         public async Task Run(
             [ServiceBusTrigger("graphQueue", Connection = "ServiceBusQueue")]
             ServiceBusReceivedMessage message,

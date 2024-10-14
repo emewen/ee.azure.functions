@@ -1,0 +1,39 @@
+{
+  "stockRules": [
+    {
+      "symbol": "MSFT",
+      "maxPrice": 500,
+      "minPrice": 250
+    },
+    {
+      "symbol": "GOOG",
+      "maxPrice": 250,
+      "minPrice": 100
+    },
+    {
+      "symbol": "AMNZ",
+      "maxPrice": 250,
+      "minPrice": 50
+    },
+    {
+      "symbol": "TSLA",
+      "maxPrice": 350,
+      "minPrice": 75
+    },
+    {
+      "symbol": "META",
+      "maxPrice": 750,
+      "minPrice": 400
+    },
+    {
+      "symbol": "APPL",
+      "maxPrice": 750,
+      "minPrice": 400
+    },
+    {
+      "symbol": "NVDA",
+      "maxPrice": 200,
+      "minPrice": 50
+    }
+  ]
+}
