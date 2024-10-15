@@ -6,6 +6,8 @@
       "connectionId": "APPLICATIONINSIGHTS_CONNECTION_STRING"
     },
     "storage1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/stock-price-function-app-89680/providers/Microsoft.ServiceLinker/linkers/AzureWebJobsStorage_4020721E67, /subscriptions/42b21f74-d14e-4b43-9b45-473634e76e7f/resourceGroups/ericewentenant-stock-price-RG-89680/providers/Microsoft.Web/sites/stock-price-function-app-89680/providers/Microsoft.ServiceLinker/linkers/AzureWebJobsStorage_28433A1CD3",
+      "secretStore": null,
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/eetstockpricestorage",
       "type": "storage.azure",
       "connectionId": "AzureWebJobsStorage"
