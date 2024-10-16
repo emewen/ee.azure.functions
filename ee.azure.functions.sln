@@ -10,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1AE7016F-B14D-4D59-AA34-7FE754674342}"
 	ProjectSection(SolutionItems) = preProject
 		azure.functions\.gitignore = azure.functions\.gitignore
+		LogicAppCodeView.json = LogicAppCodeView.json
+		LogicAppScreenshot.jpg = LogicAppScreenshot.jpg
 		main.tf = main.tf
 		outputs.tf = outputs.tf
 		terraform.tfvars = terraform.tfvars

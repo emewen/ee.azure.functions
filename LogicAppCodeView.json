@@ -1,0 +1,234 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "actions": {
+      "For_each_stock_in_Body": {
+        "actions": {
+          "For_each_stockRule_in_stockRules": {
+            "actions": {
+              "price_is_lt_rule_minPrice": {
+                "actions": {
+                  "Compose_BUY_message": {
+                    "inputs": {
+                      "action": "BUY",
+                      "actionTimestamp": "@{utcNow()}",
+                      "price": "@items('For_each_stock_in_Body')['price']",
+                      "symbol": "@{items('For_each_stock_in_Body')['symbol']}",
+                      "timestamp": "@{items('For_each_stock_in_Body')['timestamp']}"
+                    },
+                    "type": "Compose"
+                  },
+                  "Send_BUY_message": {
+                    "inputs": {
+                      "body": {
+                        "ContentData": "@base64(outputs('Compose_BUY_message'))"
+                      },
+                      "host": {
+                        "connection": {
+                          "name": "@parameters('$connections')['servicebus']['connectionId']"
+                        }
+                      },
+                      "method": "post",
+                      "path": "/@{encodeURIComponent(encodeURIComponent('ericewentenant-stock-action-queue'))}/messages"
+                    },
+                    "runAfter": {
+                      "Compose_BUY_message": [
+                        "Succeeded"
+                      ]
+                    },
+                    "type": "ApiConnection"
+                  }
+                },
+                "else": {
+                  "actions": {
+                    "price_is_gt_rule_maxPrice": {
+                      "actions": {
+                        "Compose_SELL_message": {
+                          "inputs": {
+                            "action": "SELL",
+                            "actionTimestamp": "@{utcNow()}",
+                            "price": "@items('For_each_stock_in_Body')['price']",
+                            "symbol": "@{items('For_each_stock_in_Body')['symbol']}",
+                            "timestamp": "@{items('For_each_stock_in_Body')['timestamp']}"
+                          },
+                          "type": "Compose"
+                        },
+                        "Send_SELL_message": {
+                          "inputs": {
+                            "body": {
+                              "ContentData": "@base64(outputs('Compose_SELL_message'))"
+                            },
+                            "host": {
+                              "connection": {
+                                "name": "@parameters('$connections')['servicebus']['connectionId']"
+                              }
+                            },
+                            "method": "post",
+                            "path": "/@{encodeURIComponent(encodeURIComponent('ericewentenant-stock-action-queue'))}/messages"
+                          },
+                          "runAfter": {
+                            "Compose_SELL_message": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "ApiConnection"
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@items('For_each_stock_in_Body')['symbol']",
+                              "@items('For_each_stockRule_in_stockRules')['ruleSymbol']"
+                            ]
+                          },
+                          {
+                            "greater": [
+                              "@items('For_each_stock_in_Body')['price']",
+                              "@items('For_each_stockRule_in_stockRules')['maxPrice']"
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    }
+                  }
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "equals": [
+                        "@items('For_each_stock_in_Body')['symbol']",
+                        "@items('For_each_stockRule_in_stockRules')['ruleSymbol']"
+                      ]
+                    },
+                    {
+                      "less": [
+                        "@items('For_each_stock_in_Body')['price']",
+                        "@items('For_each_stockRule_in_stockRules')['minPrice']"
+                      ]
+                    }
+                  ]
+                },
+                "type": "If"
+              }
+            },
+            "foreach": "@body('Parse_stockRules_JSON')?['stockRules']",
+            "type": "Foreach"
+          }
+        },
+        "foreach": "@triggerOutputs()?['body']",
+        "runAfter": {
+          "Parse_stockRules_JSON": [
+            "Succeeded"
+          ]
+        },
+        "type": "Foreach"
+      },
+      "Initialize_stockRules_array": {
+        "inputs": {
+          "variables": [
+            {
+              "name": "stockRules",
+              "type": "string",
+              "value": "{\n\"stockRules\": [\n  {\n    \"ruleSymbol\": \"MSFT\",\n    \"maxPrice\": 400.00,\n    \"minPrice\": 350.00\n  },\n  {\n    \"ruleSymbol\": \"GOOG\",\n    \"maxPrice\": 225.00,\n    \"minPrice\": 125.00\n  },\n  {\n    \"ruleSymbol\": \"AMNZ\",\n    \"maxPrice\": 200.00,\n    \"minPrice\": 100.00\n  },\n  {\n    \"ruleSymbol\": \"TSLA\",\n    \"maxPrice\": 250.00,\n    \"minPrice\": 150.00\n  },\n  {\n    \"ruleSymbol\": \"META\",\n    \"maxPrice\": 625.00,\n    \"minPrice\": 525.00\n  },\n  {\n    \"ruleSymbol\": \"APPL\",\n    \"maxPrice\": 575.00,\n    \"minPrice\": 500.00\n  },\n  {\n    \"ruleSymbol\": \"NVDA\",\n    \"maxPrice\": 150.00,\n    \"minPrice\": 100.00\n  }\n]\n}"
+            }
+          ]
+        },
+        "runAfter": {},
+        "type": "InitializeVariable"
+      },
+      "Parse_stockRules_JSON": {
+        "inputs": {
+          "content": "@variables('stockRules')",
+          "schema": {
+            "properties": {
+              "stockRules": {
+                "items": {
+                  "properties": {
+                    "maxPrice": {
+                      "type": "number"
+                    },
+                    "minPrice": {
+                      "type": "number"
+                    },
+                    "ruleSymbol": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ruleSymbol",
+                    "maxPrice",
+                    "minPrice"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "runAfter": {
+          "Initialize_stockRules_array": [
+            "Succeeded"
+          ]
+        },
+        "type": "ParseJson"
+      }
+    },
+    "contentVersion": "1.0.0.0",
+    "outputs": {},
+    "parameters": {
+      "$connections": {
+        "defaultValue": {},
+        "type": "Object"
+      }
+    },
+    "triggers": {
+      "When_a_HTTP_request_is_received": {
+        "inputs": {
+          "method": "POST",
+          "schema": {
+            "items": {
+              "properties": {
+                "price": {
+                  "type": "number"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "symbol",
+                "price",
+                "timestamp"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "kind": "Http",
+        "type": "Request"
+      }
+    }
+  },
+  "parameters": {
+    "$connections": {
+      "value": {
+        "servicebus": {
+          "connectionId": "/subscriptions/42b21f74-d14e-4b43-9b45-473634e76e7f/resourceGroups/ericewentenant_defaultRG/providers/Microsoft.Web/connections/servicebus",
+          "connectionName": "servicebus",
+          "id": "/subscriptions/42b21f74-d14e-4b43-9b45-473634e76e7f/providers/Microsoft.Web/locations/northcentralus/managedApis/servicebus"
+        }
+      }
+    }
+  }
+}
